@@ -1,23 +1,24 @@
-import cv2
-import time
-import src.ExternalCall_INCA
-import src.ExternalCall_Cam
+'''
+Camera Threading
+Author: HRex<hcr2077@outlook.com>
+'''
+import threading
+import src.ExternalCall_INCA as EC_INCA
+import src.ExternalCall_Cam as EC_Cam
 
 if __name__ == '__main__':
-    cap = cv2.VideoCapture(0) # Change device/mp4
-    start_time = time.time()
-    while True:
-        ret, frame = cap.read()
-        if (time.time() - start_time) != 0:  # 实时显示帧数
-            fps = 1.0 / (time.time() - start_time)
-            start_time = time.time()
-        cv2.putText(frame, 'fps: ' + str(fps), (0, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-        cv2.imshow("Video", frame)
-        # 读取内容
-        if cv2.waitKey(10) == ord("q"):
-            break
+    # Thread
+    INCA_Thread = threading.Thread(target=EC_INCA.test, args=("INCA_Thread",))
+    INCA_Thread.start()
 
-    # 随时准备按q退出
-    cap.release()
-    cv2.destroyAllWindows()
-    # 停止调用，关闭窗口
+    Camera_Thread = threading.Thread(target=EC_Cam.runCamera, args=("Camera_Thread",))
+    Camera_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
+    Camera_Thread.start()
+
+
+    
+    # point = [0,0,1]
+    # pc = EC_Cam.convert_wc_to_cc(point)
+    # print(pc)
+    # pc = EC_Cam.convert_cc_to_pixel(pc)
+    # print(pc)

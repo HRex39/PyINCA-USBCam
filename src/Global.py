@@ -1,0 +1,3 @@
+# GLOBAL VARIABLE
+
+signal = True
