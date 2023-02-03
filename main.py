@@ -3,18 +3,50 @@ Camera Threading
 Author: HRex<hcr2077@outlook.com>
 '''
 import threading
-import src.ExternalCall_INCA as EC_INCA
+from src.ExternalCall_INCA import Inca
 import src.ExternalCall_Cam as EC_Cam
+import src.Global as GB
+import argparse
+
+
+def print_variable():
+    while True:
+        print(0)
+        if GB.INCA_READY == 1:
+            print("GB.INCA_READY is ", GB.INCA_READY)
+            return
+
 
 if __name__ == '__main__':
-    # Thread
-    INCA_Thread = threading.Thread(target=EC_INCA.test, args=("INCA_Thread",))
-    INCA_Thread.start()
 
-    Camera_Thread = threading.Thread(target=EC_Cam.runCamera, args=("Camera_Thread",))
-    Camera_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
+    '''
+    parse = argparse.ArgumentParser()
+    parse.add_argument('-e', type=str, required=True)
+    parse.add_argument('-w', type=str, required=True)
+    parse.add_argument('-f', type=str, required=True)
+
+    args = parse.parse_args()
+    '''
+    exp_address = '166_13834_MY24_ACP2_1_auto_backup_1'
+    work_address = 'Workspace'
+    folder_address = '16733'
+
+    Inca_App = Inca(work_address, exp_address, folder_address)
+    threads = []
+    # Thread
+    INCA_Thread = threading.Thread(target=Inca_App.start_measurement, args=())
+    Camera_Thread = threading.Thread(target=print_variable, args=())
+
+    INCA_Thread.start()
     Camera_Thread.start()
 
+    threads.append(INCA_Thread)
+    threads.append(Camera_Thread)
+
+    for i in range(len(threads)):
+        threads[i].join()
+
+    print("结束")
 
     
     # point = [0,0,1]
