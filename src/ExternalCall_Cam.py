@@ -74,8 +74,8 @@ def runCamera(thread_name):
     while True:
         cap = cv2.VideoCapture(0) # Change device/mp4
         start_time = time.time()
-        while GB.signal:
-            print(thread_name, GB.signal)
+        while GB.INCA_READY:
+            print(thread_name, GB.INCA_READY)
             ret, frame = cap.read()
             if (time.time() - start_time) != 0:  # 实时显示帧数
                 fps = 1.0 / (time.time() - start_time)

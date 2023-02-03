@@ -27,15 +27,15 @@ if __name__ == '__main__':
 
     args = parse.parse_args()
     '''
-    exp_address = '166_13834_MY24_ACP2_1_auto_backup_1'
+    exp_address = 'TYNB'
     work_address = 'Workspace'
-    folder_address = '16733'
+    folder_address = '00TEST'
 
     Inca_App = Inca(work_address, exp_address, folder_address)
     threads = []
     # Thread
     INCA_Thread = threading.Thread(target=Inca_App.start_measurement, args=())
-    Camera_Thread = threading.Thread(target=print_variable, args=())
+    Camera_Thread = threading.Thread(target=EC_Cam.runCamera, args=("Camera_Thread",))
 
     INCA_Thread.start()
     Camera_Thread.start()

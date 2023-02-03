@@ -41,7 +41,7 @@ class Inca(object):
         mutex = threading.Lock()
         if result:
             mutex.acquire()
-            Global.INCA_READY = 0
+            GB.INCA_READY = 0
             mutex.release()
 
         return result
