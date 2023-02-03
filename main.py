@@ -41,7 +41,7 @@ if __name__ == '__main__':
     # Inca_App.init_hardware()
 
     # Inca_App.set_record()
-    threads = []
+
     # Thread
     # INCA_Thread = threading.Thread(target=Inca_App.start_measurement, args=())
 
@@ -49,15 +49,11 @@ if __name__ == '__main__':
     Camera_Thread = threading.Thread(target=EC_Cam.runCamera, args=("Camera_Thread",))
     Camera_Thread.start()
 
-    threads.append(Camera_Thread)
-
-    threads.clear()
-
-    if GB.INCA_READY and GB.VID_READY:
-        print('yes\n')
-
-    for i in range(len(threads)):
-        threads[i].join()
+    while True:
+        if GB.INCA_READY and GB.VID_READY:
+            Inca_App.stop_measurement()
+            print('yes\n')
+            break
 
     print("结束")
 

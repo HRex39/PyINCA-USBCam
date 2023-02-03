@@ -66,7 +66,7 @@ class Inca(object):
         return result
 
     def stop_measurement(self):
-        result = self.WorkExp.StartMeasurement()
+        result = self.WorkExp.StopMeasurement()
         mutex = threading.Lock()
         if result:
             mutex.acquire()
