@@ -27,21 +27,34 @@ if __name__ == '__main__':
 
     args = parse.parse_args()
     '''
-    exp_address = 'TYNB'
+    exp_address = '166_13834_MY24_ACP2_1_auto_backup_1'
     work_address = 'Workspace'
-    folder_address = '00TEST'
+    folder_address = '16733'
+    pathname = 'C:\\Users\\Public\\Documents\\ETAS\\INCA7.3\\Measure\\'
+    filename = 'DU24IV024_RVB'
+    increament_flag = 1
 
     Inca_App = Inca(work_address, exp_address, folder_address)
+    Inca_App.set_record(pathname, filename, increament_flag)
+
+    # !!! init hardware
+    # Inca_App.init_hardware()
+
+    # Inca_App.set_record()
     threads = []
     # Thread
-    INCA_Thread = threading.Thread(target=Inca_App.start_measurement, args=())
-    Camera_Thread = threading.Thread(target=EC_Cam.runCamera, args=("Camera_Thread",))
+    # INCA_Thread = threading.Thread(target=Inca_App.start_measurement, args=())
 
-    INCA_Thread.start()
+    Inca_App.start_measurement()
+    Camera_Thread = threading.Thread(target=EC_Cam.runCamera, args=("Camera_Thread",))
     Camera_Thread.start()
 
-    threads.append(INCA_Thread)
     threads.append(Camera_Thread)
+
+    threads.clear()
+
+    if GB.INCA_READY and GB.VID_READY:
+        print('yes\n')
 
     for i in range(len(threads)):
         threads[i].join()

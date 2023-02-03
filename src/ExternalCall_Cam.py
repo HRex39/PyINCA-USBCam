@@ -2,6 +2,7 @@ from math import sin, cos
 import numpy as np
 import cv2
 import time
+import threading
 
 import src.Global as GB
 
@@ -70,7 +71,9 @@ def quaternion_to_rotation_matrix(q):  # x, y ,z ,w
         dtype=q.dtype)
     return rot_matrix
 
+
 def runCamera(thread_name):
+    mutex = threading.Lock()
     while True:
         cap = cv2.VideoCapture(0) # Change device/mp4
         start_time = time.time()
@@ -80,10 +83,19 @@ def runCamera(thread_name):
             if (time.time() - start_time) != 0:  # 实时显示帧数
                 fps = 1.0 / (time.time() - start_time)
                 start_time = time.time()
+
             cv2.putText(frame, 'fps: ' + str(fps), (0, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
             cv2.imshow("Video", frame)
+            mutex.acquire()
+            GB.VID_READY = 1
+            mutex.release()
+
             if cv2.waitKey(10) == ord("q"):
                 break
+
+        while GB.VID_RECORD_START:
+            pass
+
         # 随时准备按q退出
         cap.release()
         cv2.destroyAllWindows()

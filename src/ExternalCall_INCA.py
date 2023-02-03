@@ -36,6 +36,35 @@ class Inca(object):
 
         return result
 
+    def start_record(self):
+        result = self.WorkExp.StartRecording()
+        mutex = threading.Lock()
+        if result:
+            mutex.acquire()
+            GB.VID_RECORD_START = 1
+            mutex.release()
+        return result
+
+    def stop_record_with_discard(self):
+        result = self.WorkExp.StopAndDiscardRecording()
+        mutex = threading.Lock()
+        if result:
+            mutex.acquire()
+            GB.VID_DO_NOT_SAVE = 1
+            GB.INCA_RECORD_STOP = 1
+            mutex.release()
+        return result
+
+    def stop_record(self):
+        result = self.WorkExp.StopRecording()
+        mutex = threading.Lock()
+        if result:
+            mutex.acquire()
+            GB.VID_DO_NOT_SAVE = 1
+            GB.INCA_RECORD_STOP = 1
+            mutex.release()
+        return result
+
     def stop_measurement(self):
         result = self.WorkExp.StartMeasurement()
         mutex = threading.Lock()
