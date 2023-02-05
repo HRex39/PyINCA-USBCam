@@ -5,6 +5,7 @@ Author: HRex<hcr2077@outlook.com>
 import threading
 from src.ExternalCall_INCA import Inca
 import src.ExternalCall_Cam as EC_Cam
+import src.ExternalCall_CamDecision as EC_CamDec
 import src.Global as GB
 import argparse
 
@@ -46,6 +47,11 @@ if __name__ == '__main__':
     # INCA_Thread = threading.Thread(target=Inca_App.start_measurement, args=())
 
     Inca_App.start_measurement()
+    # Cam Decision Thread
+    Camera_Decision_Thread = threading.Thread(target=EC_CamDec.runCameraDecision, args=("Camera_Decision_Thread",))
+    # Camera_Decision_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
+    Camera_Decision_Thread.start()
+    # Cam Run Thread
     Camera_Thread = threading.Thread(target=EC_Cam.runCamera, args=("Camera_Thread",))
     Camera_Thread.start()
 

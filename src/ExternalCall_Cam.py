@@ -74,11 +74,12 @@ def quaternion_to_rotation_matrix(q):  # x, y ,z ,w
 
 def runCamera(thread_name):
     mutex = threading.Lock()
-    while True:
-        cap = cv2.VideoCapture(0) # Change device/mp4
+    flag_break = 0
+    while True and not flag_break:
         start_time = time.time()
-        while GB.INCA_READY:
-            print(thread_name, GB.INCA_READY)
+        while GB.VID_DECISION == 1:
+            cap = cv2.VideoCapture(0) # Change device/mp4
+            print(thread_name, "INCA_READY:", GB.INCA_READY)
             ret, frame = cap.read()
             if (time.time() - start_time) != 0:  # 实时显示帧数
                 fps = 1.0 / (time.time() - start_time)
@@ -90,13 +91,35 @@ def runCamera(thread_name):
             GB.VID_READY = 1
             mutex.release()
 
-            if cv2.waitKey(10) == ord("q"):
+            if cv2.waitKey(10) == ord("q"):# 随时准备按q退出
+                flag_break = 1
                 break
 
-        while GB.VID_RECORD_START:
-            pass
+        while GB.VID_DECISION == 2:
+            cap = cv2.VideoCapture("../demo.mp4")
+            ret, frame = cap.read()
+            if (time.time() - start_time) != 0:  # 实时显示帧数
+                fps = 1.0 / (time.time() - start_time)
+                start_time = time.time()
 
-        # 随时准备按q退出
+            cv2.putText(frame, 'REC: ' + str(fps), (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+            cv2.imshow("Video", frame)
+            mutex.acquire()
+            GB.VID_RECORD_READY = 1
+            mutex.release()
+
+            if cv2.waitKey(10) == ord("q"):# 随时准备按q退出
+                flag_break = 1
+                break
+        
+        while GB.VID_DECISION == 3:
+            cap = cv2.VideoCapture(0) # Change device/mp4
+            print("VID_RECORD_STOP, Waiting for INCA CMD")
+            time.sleep(3)
+            if cv2.waitKey(10) == ord("q"):# 随时准备按q退出
+                flag_break = 1
+                break
+        
         cap.release()
         cv2.destroyAllWindows()
         # 停止调用，关闭窗口
