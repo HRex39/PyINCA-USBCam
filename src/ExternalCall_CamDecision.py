@@ -1,7 +1,7 @@
+import time
 import threading
 
 import src.Global as GB
-
 
 def runCameraDecision(thread_name):
     mutex = threading.Lock()
@@ -18,3 +18,4 @@ def runCameraDecision(thread_name):
             mutex.acquire()
             GB.VID_DECISION = 3
             mutex.release()
+        time.sleep(0.01) # 等等你的人民！！！
