@@ -18,4 +18,4 @@ def runCameraDecision(thread_name):
             mutex.acquire()
             GB.VID_DECISION = 3
             mutex.release()
-        time.sleep(1) # 等等你的人民！！！
+        time.sleep(0.05) # 等等你的人民！！！

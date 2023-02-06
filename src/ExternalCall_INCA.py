@@ -59,7 +59,7 @@ class Inca(object):
         return result
 
     def stop_record(self):
-        result = self.WorkExp.StopRecording()
+        result = self.WorkExp.StopRecording(self.WorkExp.GetRecordingFileName(), self.WorkExp.GetRecordingFileFormat())
         mutex = threading.Lock()
         if result:
             mutex.acquire()

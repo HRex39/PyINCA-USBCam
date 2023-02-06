@@ -71,75 +71,74 @@ def quaternion_to_rotation_matrix(q):  # x, y ,z ,w
         dtype=q.dtype)
     return rot_matrix
 
+class Camera(object):
 
-def runCamera(thread_name):
-    mutex = threading.Lock()
-    flag_break = 0
-    flag_cap1 = 0
-    flag_cap2 = 0
-    flag_cap3 = 0
-    while True and not flag_break:
-        start_time = time.time()
-        if GB.VID_DECISION == 1:
-            if flag_cap1 == 0:
-                cap = cv2.VideoCapture(0) # Change device/mp4
-                flag_cap1 = 1
-                flag_cap2 = 0
-                flag_cap3 = 0
-            # print(thread_name, "INCA_READY:", GB.INCA_READY)
-            ret, frame = cap.read()
-            if (time.time() - start_time) != 0:  # 实时显示帧数
-                fps = 1.0 / (time.time() - start_time)
-                start_time = time.time()
+    def __init__(self, threading_name):
+        self.threading_name = threading_name
 
-            cv2.putText(frame, 'fps: ' + str(fps), (0, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-            cv2.imshow("Video", frame)
-            mutex.acquire()
-            GB.VID_READY = 1
-            mutex.release()
+    def runCamera(self):
+        mutex = threading.Lock()
+        flag_break = 0
+        flag_cap = [0,0,0,0]
+        cap = cv2.VideoCapture(0) # Will just cap one Cam
+        while True and not flag_break:
+            start_time = time.time()
+            if GB.VID_DECISION == 1:
+                if flag_cap[1] == 0:
+                    cv2.destroyAllWindows()
+                    cap = cv2.VideoCapture(0)
+                    flag_cap = [0,1,0,0]
+                ret, frame = cap.read()
+                if (time.time() - start_time) != 0:  # 实时显示帧数
+                    fps = 1.0 / (time.time() - start_time)
+                    start_time = time.time()
 
-            if cv2.waitKey(10) == ord("q"):# 随时准备按q退出
-                flag_break = 1
-                flag_cap1 = 0
+                cv2.putText(frame, 'show: ' + str(fps), (0, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+                cv2.imshow("Video - GB.VID_DECISION=1", frame)
+                mutex.acquire()
+                GB.VID_READY = 1
+                mutex.release()
+
+                if cv2.waitKey(10) == ord("q"):# 随时准备按q退出
+                    flag_break = 1
+                    flag_cap = [0,0,0,0]
+                    cap.release()
+                    cv2.destroyAllWindows()# 停止调用，关闭窗口
+                    break
+
+            if GB.VID_DECISION == 2:
+                if flag_cap[2] == 0:
+                    cv2.destroyAllWindows()
+                    cap = cv2.VideoCapture(0)
+                    mutex.acquire()
+                    GB.VID_RECORD_READY = 1
+                    mutex.release()
+                    flag_cap = [0,0,1,0]
+                width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                fps = cap.get(cv2.CAP_PROP_FPS)
+                fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+                writer = cv2.VideoWriter("video_result.mp4", fourcc, fps, (width, height))
+
+                while cap.isOpened():
+                    ret, frame = cap.read()  # 读取摄像头画面
+                    print("\r"+"Saving Video...", end="")
+                    if ret == True:
+                        writer.write(frame)  # 视频保存
+                    if GB.INCA_RECORD_STOP == 1:
+                        break
+
                 cap.release()
-                cv2.destroyAllWindows()# 停止调用，关闭窗口
-                break
-
-        if GB.VID_DECISION == 2:
-            if flag_cap2 == 0:
-                cap = cv2.VideoCapture("../demo.mp4")
-                flag_cap1 = 0
-                flag_cap2 = 1
-                flag_cap3 = 0
-            ret, frame = cap.read()
-            if (time.time() - start_time) != 0:  # 实时显示帧数
-                fps = 1.0 / (time.time() - start_time)
-                start_time = time.time()
-
-            cv2.putText(frame, 'REC: ' + str(fps), (0, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-            cv2.imshow("Video", frame)
-            mutex.acquire()
-            GB.VID_RECORD_READY = 1
-            mutex.release()
-
-            if cv2.waitKey(10) == ord("q"):# 随时准备按q退出
-                flag_break = 1
-                cap.release()
-                cv2.destroyAllWindows()# 停止调用，关闭窗口
-                break
-        
-        if GB.VID_DECISION == 3:
-            if flag_cap3 == 0:
-                cap = cv2.VideoCapture(0) # Change device/mp4
-                flag_cap1 = 0
-                flag_cap2 = 0
-                flag_cap3 = 1
-            print("VID_RECORD_STOP, Waiting for INCA CMD")
-            cap.release()
-            cv2.destroyAllWindows()# 停止调用，关闭窗口
-            time.sleep(3)
-            if cv2.waitKey(10) == ord("q"):# 随时准备按q退出
-                flag_break = 1
-                cap.release()
-                cv2.destroyAllWindows()# 停止调用，关闭窗口
-                break
+                writer.release()
+                time.sleep(1) # Warning：千万不可以删，我真的劝劝你，等等你的人民！！！！！！
+                mutex.acquire()
+                GB.VID_RECORD_READY = 0
+                mutex.release()
+                cv2.destroyAllWindows()  # 停止调用，关闭窗口
+            
+            if GB.VID_DECISION == 3:
+                if flag_cap[3] == 0:
+                    cv2.destroyAllWindows()
+                    flag_cap = [0,0,0,1]
+                    print("\n\r"+"VID_RECORD_STOP, Waiting for INCA CMD", end="")
+                time.sleep(0.1)

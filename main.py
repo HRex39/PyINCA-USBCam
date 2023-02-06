@@ -6,8 +6,8 @@ import threading
 import time
 
 from src.ExternalCall_INCA import Inca
-import src.ExternalCall_Cam as EC_Cam
-import src.ExternalCall_CamDecision as EC_CamDec
+import src.ExternalCall_Cam as Cam
+import src.ExternalCall_CamDecision as CamDecision
 import src.Global as GB
 import argparse
 
@@ -30,9 +30,9 @@ if __name__ == '__main__':
 
     args = parse.parse_args()
     '''
-    exp_address = '166_13834_MY24_ACP2_1_auto_backup_1'
+    exp_address = 'TYNB'
     work_address = 'Workspace'
-    folder_address = '16733'
+    folder_address = '00TEST'
     pathname = 'C:\\Users\\Public\\Documents\\ETAS\\INCA7.3\\Measure\\'
     filename = 'DU24IV024_RVB'
     increament_flag = 1
@@ -53,11 +53,13 @@ if __name__ == '__main__':
 
     Inca_App.start_measurement()
     # Cam Decision Thread
-    Camera_Decision_Thread = threading.Thread(target=EC_CamDec.runCameraDecision, args=("Camera_Decision_Thread",))
-    # Camera_Decision_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
+    Camera_Decision_Thread = threading.Thread(target=CamDecision.runCameraDecision, args=("Camera_Decision_Thread",))
+    Camera_Decision_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
     Camera_Decision_Thread.start()
     # Cam Run Thread
-    Camera_Thread = threading.Thread(target=EC_Cam.runCamera, args=("Camera_Thread",))
+    Cam1 = Cam.Camera("Cam1_Thread")
+    Camera_Thread = threading.Thread(target=Cam1.runCamera)
+    Camera_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
     Camera_Thread.start()
 
     while True:
@@ -81,9 +83,9 @@ if __name__ == '__main__':
 
             # 0 中止并丢弃数据 1 中止并保存数据
             if decision_1 == 0:
-                Inca.stop_record_with_discard()
+                Inca_App.stop_record_with_discard()
             elif decision_1 == 1:
-                Inca.stop_record()
+                Inca_App.stop_record()
             else:
                 print("wrong input, exit")
                 break

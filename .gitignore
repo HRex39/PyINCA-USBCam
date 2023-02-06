@@ -130,3 +130,6 @@ dmypy.json
 
 # Pycharm
 .idea/
+
+# MP4
+*.mp4
