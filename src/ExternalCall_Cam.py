@@ -86,7 +86,7 @@ def runCamera(thread_name):
                 flag_cap1 = 1
                 flag_cap2 = 0
                 flag_cap3 = 0
-            print(thread_name, "INCA_READY:", GB.INCA_READY)
+            # print(thread_name, "INCA_READY:", GB.INCA_READY)
             ret, frame = cap.read()
             if (time.time() - start_time) != 0:  # 实时显示帧数
                 fps = 1.0 / (time.time() - start_time)

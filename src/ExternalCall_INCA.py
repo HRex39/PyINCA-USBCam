@@ -42,6 +42,7 @@ class Inca(object):
         if result:
             mutex.acquire()
             GB.VID_RECORD_START = 1
+            GB.VID_RECORD_STOP = 0
             mutex.release()
         return result
 
@@ -52,6 +53,8 @@ class Inca(object):
             mutex.acquire()
             GB.VID_DO_NOT_SAVE = 1
             GB.INCA_RECORD_STOP = 1
+            GB.VID_RECORD_START = 0
+            GB.VID_RECORD_STOP = 1
             mutex.release()
         return result
 
@@ -60,8 +63,10 @@ class Inca(object):
         mutex = threading.Lock()
         if result:
             mutex.acquire()
-            GB.VID_DO_NOT_SAVE = 1
+            GB.VID_DO_NOT_SAVE = 0
             GB.INCA_RECORD_STOP = 1
+            GB.VID_RECORD_START = 0
+            GB.VID_RECORD_STOP = 1
             mutex.release()
         return result
 
@@ -74,3 +79,6 @@ class Inca(object):
             mutex.release()
 
         return result
+
+    def close_inca(self):
+        return self.w.CloseTool()

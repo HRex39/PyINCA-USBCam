@@ -3,6 +3,8 @@ Camera Threading
 Author: HRex<hcr2077@outlook.com>
 '''
 import threading
+import time
+
 from src.ExternalCall_INCA import Inca
 import src.ExternalCall_Cam as EC_Cam
 import src.ExternalCall_CamDecision as EC_CamDec
@@ -38,8 +40,11 @@ if __name__ == '__main__':
     Inca_App = Inca(work_address, exp_address, folder_address)
     Inca_App.set_record(pathname, filename, increament_flag)
 
-    # !!! init hardware
-    # Inca_App.init_hardware()
+    # !!! init hardware 0 do not init 1 init
+    init_or_not = int(input("是否需要初始化硬件： "))
+    print("\n")
+    if init_or_not == 1:
+        Inca_App.init_hardware()
 
     # Inca_App.set_record()
 
@@ -57,9 +62,49 @@ if __name__ == '__main__':
 
     while True:
         if GB.INCA_READY and GB.VID_READY:
-            Inca_App.stop_measurement()
-            print('yes\n')
-            break
+            decision = int(input("是否开始记录: "))
+            print("\n")
+            # 0 不记录并停止测量 1 开始记录
+            if decision == 0:
+                Inca_App.stop_measurement()
+                print("stop measurement!\n")
+                break
+            elif decision == 1:
+                Inca_App.start_record()
+                print("start recording\n")
+            else:
+                print("wrong input, exit\n")
+                break
+
+            decision_1 = int(input("是否停止记录: "))
+            print("\n")
+
+            # 0 中止并丢弃数据 1 中止并保存数据
+            if decision_1 == 0:
+                Inca.stop_record_with_discard()
+            elif decision_1 == 1:
+                Inca.stop_record()
+            else:
+                print("wrong input, exit")
+                break
+
+            decision_2 = int(input("是否重新开始测量: "))
+            print("\n")
+
+            # 0 直接退出 1 重新开始测量
+
+            if decision_2 == 0:
+                Inca_App.close_inca()
+                print('inca yes\n')
+                break
+            elif decision_1 == 1:
+                Inca_App.start_measurement()
+            else:
+                print("wrong input, exit\n")
+                break
+        else:
+            print("conditions not correct!\n")
+            time.sleep(0.1)
 
     print("结束")
 
