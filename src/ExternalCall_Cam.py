@@ -75,10 +75,17 @@ def quaternion_to_rotation_matrix(q):  # x, y ,z ,w
 def runCamera(thread_name):
     mutex = threading.Lock()
     flag_break = 0
+    flag_cap1 = 0
+    flag_cap2 = 0
+    flag_cap3 = 0
     while True and not flag_break:
         start_time = time.time()
         if GB.VID_DECISION == 1:
-            cap = cv2.VideoCapture(0) # Change device/mp4
+            if flag_cap1 == 0:
+                cap = cv2.VideoCapture(0) # Change device/mp4
+                flag_cap1 = 1
+                flag_cap2 = 0
+                flag_cap3 = 0
             print(thread_name, "INCA_READY:", GB.INCA_READY)
             ret, frame = cap.read()
             if (time.time() - start_time) != 0:  # 实时显示帧数
@@ -93,12 +100,17 @@ def runCamera(thread_name):
 
             if cv2.waitKey(10) == ord("q"):# 随时准备按q退出
                 flag_break = 1
+                flag_cap1 = 0
                 cap.release()
                 cv2.destroyAllWindows()# 停止调用，关闭窗口
                 break
 
         if GB.VID_DECISION == 2:
-            cap = cv2.VideoCapture("../demo.mp4")
+            if flag_cap2 == 0:
+                cap = cv2.VideoCapture("../demo.mp4")
+                flag_cap1 = 0
+                flag_cap2 = 1
+                flag_cap3 = 0
             ret, frame = cap.read()
             if (time.time() - start_time) != 0:  # 实时显示帧数
                 fps = 1.0 / (time.time() - start_time)
@@ -117,7 +129,11 @@ def runCamera(thread_name):
                 break
         
         if GB.VID_DECISION == 3:
-            cap = cv2.VideoCapture(0) # Change device/mp4
+            if flag_cap3 == 0:
+                cap = cv2.VideoCapture(0) # Change device/mp4
+                flag_cap1 = 0
+                flag_cap2 = 0
+                flag_cap3 = 1
             print("VID_RECORD_STOP, Waiting for INCA CMD")
             cap.release()
             cv2.destroyAllWindows()# 停止调用，关闭窗口
