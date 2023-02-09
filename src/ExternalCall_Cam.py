@@ -73,20 +73,21 @@ def quaternion_to_rotation_matrix(q):  # x, y ,z ,w
 
 class Camera(object):
 
-    def __init__(self, threading_name):
+    def __init__(self, threading_name, device_id):
         self.threading_name = threading_name
+        self.device_id = device_id
 
     def runCamera(self):
         mutex = threading.Lock()
         flag_break = 0
         flag_cap = [0,0,0,0]
-        cap = cv2.VideoCapture(0) # Will just cap one Cam
+        cap = cv2.VideoCapture(self.device_id) # Will just cap one Cam
         while True and not flag_break:
             start_time = time.time()
             if GB.VID_DECISION == 1:
                 if flag_cap[1] == 0:
                     cv2.destroyAllWindows()
-                    cap = cv2.VideoCapture(0)
+                    cap = cv2.VideoCapture(self.device_id)
                     flag_cap = [0,1,0,0]
                 ret, frame = cap.read()
                 if (time.time() - start_time) != 0:  # 实时显示帧数
@@ -109,7 +110,7 @@ class Camera(object):
             if GB.VID_DECISION == 2:
                 if flag_cap[2] == 0:
                     cv2.destroyAllWindows()
-                    cap = cv2.VideoCapture(0)
+                    cap = cv2.VideoCapture(self.device_id)
                     mutex.acquire()
                     GB.VID_RECORD_READY = 1
                     mutex.release()
