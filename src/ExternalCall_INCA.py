@@ -26,6 +26,9 @@ class Inca(object):
         self.WorkExp.SetRecordingFileName(filename)
         self.WorkExp.SetRecordingFileAutoincrementFlag(increament_flag)
 
+    def get_measure_value(self, ValueName):
+        return self.WorkExp.GetMeasureElement(ValueName)
+
     def start_measurement(self):
         result = self.WorkExp.StartMeasurement()
         mutex = threading.Lock()
@@ -41,7 +44,7 @@ class Inca(object):
         mutex = threading.Lock()
         if result:
             mutex.acquire()
-            GB.VID_RECORD_START = 1
+            # GB.VID_RECORD_START = 1
             GB.VID_RECORD_STOP = 0
             mutex.release()
         return result

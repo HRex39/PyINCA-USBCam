@@ -133,3 +133,6 @@ dmypy.json
 
 # MP4
 *.mp4
+
+# TXT
+*.txt

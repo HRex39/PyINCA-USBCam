@@ -20,3 +20,15 @@ VID_DECISION = 0
 VID_READY = 0
 # Cam Record Status
 VID_RECORD_READY = 0
+
+
+# ---time point--- #
+
+START_RECORD_TIME = 0
+STOP_RECORD_TIME = 0
+VID_START_RECORD_TIME = 0
+VID_STOP_RECORD_TIME = 0
+
+# --- file count --- #
+
+count_number = 0

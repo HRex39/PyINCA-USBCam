@@ -30,9 +30,9 @@ if __name__ == '__main__':
 
     args = parse.parse_args()
     '''
-    exp_address = 'TYNB'
+    exp_address = '166_13834_MY24_ACP2_1_auto_backup_1'
     work_address = 'Workspace'
-    folder_address = '00TEST'
+    folder_address = '16733'
     pathname = 'C:\\Users\\Public\\Documents\\ETAS\\INCA7.3\\Measure\\'
     filename = 'DU24IV024_RVB'
     increament_flag = 1
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     Camera_Decision_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
     Camera_Decision_Thread.start()
     # Cam Run Thread
-    Cam1 = Cam.Camera(threading_name="Cam1_Thread", device_id=1)
+    Cam1 = Cam.Camera("Cam1_Thread")
     Camera_Thread = threading.Thread(target=Cam1.runCamera)
     Camera_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
     Camera_Thread.start()
@@ -72,7 +72,12 @@ if __name__ == '__main__':
                 print("stop measurement!\n")
                 break
             elif decision == 1:
+                GB.count_number += 1
+                GB.VID_RECORD_START = 1
+                while not GB.VID_RECORD_READY:
+                    pass
                 Inca_App.start_record()
+                GB.START_RECORD_TIME = time.time()
                 print("start recording\n")
             else:
                 print("wrong input, exit\n")
@@ -89,6 +94,20 @@ if __name__ == '__main__':
             else:
                 print("wrong input, exit")
                 break
+
+            GB.VID_STOP_RECORD_TIME = time.time()
+
+            log_file_name = "log_" + str(GB.count_number) + ".txt"
+            with open(log_file_name, 'a') as f:
+                f.write("Inca_file_time: ")
+                f.write(str(GB.VID_STOP_RECORD_TIME))
+                f.write('\n')
+                offset_time = GB.VID_START_RECORD_TIME - GB.START_RECORD_TIME
+                f.write("offset time is: ")
+                f.write(str(offset_time))
+                f.write('\n')
+
+            GB.VID_RECORD_START = 0
 
             decision_2 = int(input("是否重新开始测量: "))
             print("\n")
