@@ -57,7 +57,7 @@ if __name__ == '__main__':
     Camera_Decision_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
     Camera_Decision_Thread.start()
     # Cam Run Thread
-    Cam1 = Cam.Camera("Cam1_Thread")
+    Cam1 = Cam.Camera(threading_name="Cam1_Thread", device_id=1)
     Camera_Thread = threading.Thread(target=Cam1.runCamera)
     Camera_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
     Camera_Thread.start()
