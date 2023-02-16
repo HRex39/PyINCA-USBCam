@@ -2,9 +2,7 @@ from math import sin, cos
 import numpy as np
 import cv2
 import time
-import threading
-
-import src.Global as GB
+import multiprocessing
 
 '''
 1，世界坐标系
@@ -77,14 +75,14 @@ class Camera(object):
         self.threading_name = threading_name
         self.device_id = device_id
 
-    def runCamera(self):
-        mutex = threading.Lock()
+    def runCamera(self, count_number, VID_DECISION, VID_READY, VID_START_RECORD_TIME, VID_RECORD_READY, INCA_RECORD_STOP, INCA_EXIT):
+        mutex = multiprocessing.Lock()
         flag_break = 0
         flag_cap = [0, 0, 0, 0]
         cap = cv2.VideoCapture(self.device_id) # Will just cap one Cam
         while True and not flag_break:
             start_time = time.time()
-            if GB.VID_DECISION == 1:
+            if VID_DECISION.value == 1:
                 if flag_cap[1] == 0:
                     cv2.destroyAllWindows()
                     cap = cv2.VideoCapture(self.device_id)
@@ -97,7 +95,7 @@ class Camera(object):
                 cv2.putText(frame, 'show: ' + str(fps), (0, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 cv2.imshow("Video - GB.VID_DECISION=1", frame)
                 mutex.acquire()
-                GB.VID_READY = 1
+                VID_READY.value = 1
                 mutex.release()
 
                 if cv2.waitKey(10) == ord("q"):# 随时准备按q退出
@@ -107,20 +105,20 @@ class Camera(object):
                     cv2.destroyAllWindows()# 停止调用，关闭窗口
                     break
 
-            if GB.VID_DECISION == 2:
+            if VID_DECISION.value == 2:
                 if flag_cap[2] == 0:
                     cv2.destroyAllWindows()
                     cap = cv2.VideoCapture(self.device_id)
-                    GB.VID_START_RECORD_TIME = time.time()
+                    VID_START_RECORD_TIME.value = time.time()
                     mutex.acquire()
-                    GB.VID_RECORD_READY = 1
+                    VID_RECORD_READY.value = 1
                     mutex.release()
                     flag_cap = [0,0,1,0]
                 width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                 fps = cap.get(cv2.CAP_PROP_FPS)
                 fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
-                filename = "video_result_" + str(GB.count_number) + ".mp4"
+                filename = "video_result_" + str(count_number.value) + ".mp4"
                 writer = cv2.VideoWriter(filename, fourcc, fps, (width, height))
 
                 while cap.isOpened():
@@ -128,20 +126,23 @@ class Camera(object):
                      # print("\r"+"Saving Video...", end="")
                     if ret == True:
                         writer.write(frame)  # 视频保存
-                    if GB.INCA_RECORD_STOP == 1:
+                    if INCA_RECORD_STOP.value == 1:
                         break
 
                 cap.release()
                 writer.release()
                 time.sleep(1)
                 mutex.acquire()
-                GB.VID_RECORD_READY = 0
+                VID_RECORD_READY.value = 0
                 mutex.release()
                 cv2.destroyAllWindows()# 停止调用，关闭窗口
             
-            if GB.VID_DECISION == 3:
+            if VID_DECISION.value == 3:
                 if flag_cap[3] == 0:
                     cv2.destroyAllWindows()
                     flag_cap = [0,0,0,1]
                 time.sleep(0.1)
+
+            if INCA_EXIT.value:
+                break
 

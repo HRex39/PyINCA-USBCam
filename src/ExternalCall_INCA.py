@@ -1,6 +1,5 @@
-import threading
+import multiprocessing
 import win32com
-import src.Global as GB
 from win32com.client import Dispatch, constants
 
 
@@ -29,59 +28,66 @@ class Inca(object):
     def get_measure_value(self, ValueName):
         return self.WorkExp.GetMeasureElement(ValueName)
 
-    def start_measurement(self):
+    def start_measurement(self, INCA_READY):
         result = self.WorkExp.StartMeasurement()
-        mutex = threading.Lock()
+        mutex = multiprocessing.Lock()
         if result:
             mutex.acquire()
-            GB.INCA_READY = 1
+            INCA_READY.value = 1
             mutex.release()
 
         return result
 
-    def start_record(self):
+    def start_record(self, VID_RECORD_STOP):
         result = self.WorkExp.StartRecording()
-        mutex = threading.Lock()
+        mutex = multiprocessing.Lock()
         if result:
             mutex.acquire()
             # GB.VID_RECORD_START = 1
-            GB.VID_RECORD_STOP = 0
+            VID_RECORD_STOP.value = 0
             mutex.release()
         return result
 
-    def stop_record_with_discard(self):
+    def stop_record_with_discard(self, VID_DO_NOT_SAVE, INCA_RECORD_STOP, VID_RECORD_START, VID_RECORD_STOP):
         result = self.WorkExp.StopAndDiscardRecording()
-        mutex = threading.Lock()
+        mutex = multiprocessing.Lock()
         if result:
             mutex.acquire()
-            GB.VID_DO_NOT_SAVE = 1
-            GB.INCA_RECORD_STOP = 1
-            GB.VID_RECORD_START = 0
-            GB.VID_RECORD_STOP = 1
+            VID_DO_NOT_SAVE.value = 1
+            INCA_RECORD_STOP.value = 1
+            VID_RECORD_START.value = 0
+            VID_RECORD_STOP.value = 1
             mutex.release()
         return result
 
-    def stop_record(self):
+    def stop_record(self, VID_DO_NOT_SAVE, INCA_RECORD_STOP, VID_RECORD_START, VID_RECORD_STOP):
         result = self.WorkExp.StopRecording(self.WorkExp.GetRecordingFileName(), self.WorkExp.GetRecordingFileFormat())
-        mutex = threading.Lock()
+        mutex = multiprocessing.Lock()
         if result:
             mutex.acquire()
-            GB.VID_DO_NOT_SAVE = 0
-            GB.INCA_RECORD_STOP = 1
-            GB.VID_RECORD_START = 0
-            GB.VID_RECORD_STOP = 1
+            VID_DO_NOT_SAVE.value = 0
+            INCA_RECORD_STOP.value = 1
+            VID_RECORD_START.value = 0
+            VID_RECORD_STOP.value = 1
             mutex.release()
         return result
 
-    def stop_measurement(self):
+    def stop_measurement(self, INCA_READY):
         result = self.WorkExp.StopMeasurement()
-        mutex = threading.Lock()
+        mutex = multiprocessing.Lock()
         if result:
             mutex.acquire()
-            GB.INCA_READY = 0
+            INCA_READY.value = 0
             mutex.release()
 
         return result
 
-    def close_inca(self):
-        return self.w.CloseTool()
+    def close_inca(self, INCA_EXIT):
+        result = self.w.CloseTool()
+        mutex = multiprocessing.Lock()
+        if result:
+            mutex.acquire()
+            INCA_EXIT.value = 1
+            mutex.release()
+
+        return result

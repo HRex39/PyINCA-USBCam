@@ -1,24 +1,12 @@
-'''
-Camera Threading
-Author: HRex<hcr2077@outlook.com>
-'''
-import threading
+import multiprocessing
 import time
+import ctypes
+import sys
 
 from src.ExternalCall_INCA import Inca
 import src.ExternalCall_Cam as Cam
 import src.ExternalCall_CamDecision as CamDecision
-import src.Global as GB
 import argparse
-
-
-def print_variable():
-    while True:
-        print(0)
-        if GB.INCA_READY == 1:
-            print("GB.INCA_READY is ", GB.INCA_READY)
-            return
-
 
 if __name__ == '__main__':
 
@@ -30,6 +18,41 @@ if __name__ == '__main__':
 
     args = parse.parse_args()
     '''
+
+    # --- Inca Modify --- #
+    # use this signal to show the inca status
+    INCA_READY = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    # use this signal to start video recording
+    VID_RECORD_START = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    # use this signal to discard both inca and video file
+    VID_DO_NOT_SAVE = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    # use this to stop the inca record and save
+    INCA_RECORD_STOP = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    # use this to stop the video record and save
+    VID_RECORD_STOP = multiprocessing.Manager().Value(ctypes.c_int, 0)
+
+    # --- Cam Modify --- #
+    # Cam Decision
+    VID_DECISION = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    # Cam Ready Status
+    VID_READY = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    # Cam Record Status
+    VID_RECORD_READY = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    # ---time point--- #
+
+    START_RECORD_TIME = multiprocessing.Manager().Value(ctypes.c_float, 0)
+    STOP_RECORD_TIME = multiprocessing.Manager().Value(ctypes.c_float, 0)
+    VID_START_RECORD_TIME = multiprocessing.Manager().Value(ctypes.c_float, 0)
+    VID_STOP_RECORD_TIME = multiprocessing.Manager().Value(ctypes.c_float, 0)
+
+    # --- file count --- #
+
+    count_number = multiprocessing.Manager().Value(ctypes.c_int, 0)
+
+    # --- exit method --- #
+
+    INCA_EXIT = multiprocessing.Manager().Value(ctypes.c_int, 0)
+
     exp_address = '166_13834_MY24_ACP2_1_auto_backup_1'
     work_address = 'Workspace'
     folder_address = '16733'
@@ -51,33 +74,32 @@ if __name__ == '__main__':
     # Thread
     # INCA_Thread = threading.Thread(target=Inca_App.start_measurement, args=())
 
-    Inca_App.start_measurement()
-    # Cam Decision Thread
-    Camera_Decision_Thread = threading.Thread(target=CamDecision.runCameraDecision, args=("Camera_Decision_Thread",))
-    Camera_Decision_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
-    Camera_Decision_Thread.start()
-    # Cam Run Thread
-    Cam1 = Cam.Camera(threading_name="Cam1_Thread", device_id=1)
-    Camera_Thread = threading.Thread(target=Cam1.runCamera)
-    Camera_Thread.setDaemon(True) # 守护线程，该子线程会随着主线程的退出而退出
-    Camera_Thread.start()
+    Inca_App.start_measurement(INCA_READY)
+    p2 = multiprocessing.Process(target=CamDecision.runCameraDecision, args=(
+    "Camera_Decision_Thread", VID_DECISION, INCA_READY, VID_RECORD_START, VID_RECORD_STOP, INCA_EXIT))
+    Cam1 = Cam.Camera(threading_name="Cam1_Thread", device_id=0)
+    p3 = multiprocessing.Process(target=Cam1.runCamera, args=(
+    count_number, VID_DECISION, VID_READY, VID_START_RECORD_TIME, VID_RECORD_READY, INCA_RECORD_STOP, INCA_EXIT))
+
+    p2.start()
+    p3.start()
 
     while True:
-        if GB.INCA_READY and GB.VID_READY:
+        if INCA_READY.value and VID_READY.value:
             decision = int(input("是否开始记录: "))
             print("\n")
             # 0 不记录并停止测量 1 开始记录
             if decision == 0:
-                Inca_App.stop_measurement()
+                Inca_App.stop_measurement(INCA_READY)
                 print("stop measurement!\n")
                 break
             elif decision == 1:
-                GB.count_number += 1
-                GB.VID_RECORD_START = 1
-                while not GB.VID_RECORD_READY:
+                count_number.value = count_number.value + 1
+                VID_RECORD_START.value = 1
+                while not VID_RECORD_READY.value:
                     pass
-                Inca_App.start_record()
-                GB.START_RECORD_TIME = time.time()
+                Inca_App.start_record(VID_RECORD_STOP)
+                START_RECORD_TIME = time.time()
                 print("start recording\n")
             else:
                 print("wrong input, exit\n")
@@ -88,21 +110,21 @@ if __name__ == '__main__':
 
             # 0 中止并丢弃数据 1 中止并保存数据
             if decision_1 == 0:
-                Inca_App.stop_record_with_discard()
+                Inca_App.stop_record_with_discard(VID_DO_NOT_SAVE, INCA_RECORD_STOP, VID_RECORD_START, VID_RECORD_STOP)
             elif decision_1 == 1:
-                Inca_App.stop_record()
+                Inca_App.stop_record(VID_DO_NOT_SAVE, INCA_RECORD_STOP, VID_RECORD_START, VID_RECORD_STOP)
             else:
                 print("wrong input, exit")
                 break
 
-            GB.VID_STOP_RECORD_TIME = time.time()
+            VID_STOP_RECORD_TIME.value = time.time()
 
-            log_file_name = "log_" + str(GB.count_number) + ".txt"
+            log_file_name = "log_" + str(count_number.value) + ".txt"
             with open(log_file_name, 'a') as f:
                 f.write("Inca_file_time: ")
-                f.write(str(GB.VID_STOP_RECORD_TIME))
+                f.write(str(VID_STOP_RECORD_TIME))
                 f.write('\n')
-                offset_time = GB.VID_START_RECORD_TIME - GB.START_RECORD_TIME
+                offset_time = VID_START_RECORD_TIME.value - START_RECORD_TIME
                 f.write("offset time is: ")
                 f.write(str(offset_time))
                 f.write('\n')
@@ -113,27 +135,29 @@ if __name__ == '__main__':
             # 0 直接退出 1 重新开始测量
 
             if decision_2 == 0:
-                Inca_App.close_inca()
+                Inca_App.close_inca(INCA_EXIT)
                 print('inca yes\n')
                 break
             elif decision_2 == 1:
-                GB.VID_RECORD_START = 0
-                GB.INCA_READY = 0
-                GB.VID_DO_NOT_SAVE = 0
-                GB.INCA_RECORD_STOP = 0
-                GB.VID_RECORD_STOP = 0
-                GB.VID_READY = 0
-                GB.VID_RECORD_READY = 0
-                Inca_App.start_measurement()
+                VID_RECORD_START.value = 0
+                INCA_READY.value = 0
+                VID_DO_NOT_SAVE.value = 0
+                INCA_RECORD_STOP.value = 0
+                VID_RECORD_STOP.value = 0
+                VID_READY.value = 0
+                VID_RECORD_READY.value = 0
+                Inca_App.start_measurement(INCA_READY)
             else:
                 print("wrong input, exit\n")
                 break
         else:
-            pass
+            # print("conditions not correct!\n")
             time.sleep(0.1)
 
-    print("结束")
+    p2.join()
+    p3.join()
 
+    print("all process dead\n")
     
     # point = [0,0,1]
     # pc = EC_Cam.convert_wc_to_cc(point)
