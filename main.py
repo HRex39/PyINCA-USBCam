@@ -99,7 +99,7 @@ if __name__ == '__main__':
                 while not VID_RECORD_READY.value:
                     pass
                 Inca_App.start_record(VID_RECORD_STOP)
-                START_RECORD_TIME = time.time()
+                START_RECORD_TIME.value = time.time()
                 print("start recording\n")
             else:
                 print("wrong input, exit\n")
@@ -124,7 +124,7 @@ if __name__ == '__main__':
                 f.write("Inca_file_time: ")
                 f.write(str(VID_STOP_RECORD_TIME))
                 f.write('\n')
-                offset_time = VID_START_RECORD_TIME.value - START_RECORD_TIME
+                offset_time = VID_START_RECORD_TIME.value - START_RECORD_TIME.value
                 f.write("offset time is: ")
                 f.write(str(offset_time))
                 f.write('\n')
