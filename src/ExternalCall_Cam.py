@@ -138,7 +138,6 @@ class Camera(object):
                 GB.VID_RECORD_READY = 0
                 mutex.release()
                 cv2.destroyAllWindows()# 停止调用，关闭窗口
-                break
             
             if GB.VID_DECISION == 3:
                 if flag_cap[3] == 0:

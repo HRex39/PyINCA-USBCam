@@ -107,8 +107,6 @@ if __name__ == '__main__':
                 f.write(str(offset_time))
                 f.write('\n')
 
-            GB.VID_RECORD_START = 0
-
             decision_2 = int(input("是否重新开始测量: "))
             print("\n")
 
@@ -118,13 +116,20 @@ if __name__ == '__main__':
                 Inca_App.close_inca()
                 print('inca yes\n')
                 break
-            elif decision_1 == 1:
+            elif decision_2 == 1:
+                GB.VID_RECORD_START = 0
+                GB.INCA_READY = 0
+                GB.VID_DO_NOT_SAVE = 0
+                GB.INCA_RECORD_STOP = 0
+                GB.VID_RECORD_STOP = 0
+                GB.VID_READY = 0
+                GB.VID_RECORD_READY = 0
                 Inca_App.start_measurement()
             else:
                 print("wrong input, exit\n")
                 break
         else:
-            print("conditions not correct!\n")
+            pass
             time.sleep(0.1)
 
     print("结束")
