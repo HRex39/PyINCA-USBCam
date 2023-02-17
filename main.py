@@ -1,4 +1,5 @@
 import multiprocessing
+from multiprocessing.sharedctypes import Value
 import time
 import ctypes
 import sys
@@ -21,37 +22,37 @@ if __name__ == '__main__':
 
     # --- Inca Modify --- #
     # use this signal to show the inca status
-    INCA_READY = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    INCA_READY = Value(ctypes.c_int, 0)
     # use this signal to start video recording
-    VID_RECORD_START = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    VID_RECORD_START = Value(ctypes.c_int, 0)
     # use this signal to discard both inca and video file
-    VID_DO_NOT_SAVE = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    VID_DO_NOT_SAVE = Value(ctypes.c_int, 0)
     # use this to stop the inca record and save
-    INCA_RECORD_STOP = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    INCA_RECORD_STOP = Value(ctypes.c_int, 0)
     # use this to stop the video record and save
-    VID_RECORD_STOP = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    VID_RECORD_STOP = Value(ctypes.c_int, 0)
 
     # --- Cam Modify --- #
     # Cam Decision
-    VID_DECISION = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    VID_DECISION = Value(ctypes.c_int, 0)
     # Cam Ready Status
-    VID_READY = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    VID_READY = Value(ctypes.c_int, 0)
     # Cam Record Status
-    VID_RECORD_READY = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    VID_RECORD_READY = Value(ctypes.c_int, 0)
     # ---time point--- #
 
-    START_RECORD_TIME = multiprocessing.Manager().Value(ctypes.c_float, 0)
-    STOP_RECORD_TIME = multiprocessing.Manager().Value(ctypes.c_float, 0)
-    VID_START_RECORD_TIME = multiprocessing.Manager().Value(ctypes.c_float, 0)
-    VID_STOP_RECORD_TIME = multiprocessing.Manager().Value(ctypes.c_float, 0)
+    START_RECORD_TIME = Value(ctypes.c_float, 0)
+    STOP_RECORD_TIME = Value(ctypes.c_float, 0)
+    VID_START_RECORD_TIME = Value(ctypes.c_float, 0)
+    VID_STOP_RECORD_TIME = Value(ctypes.c_float, 0)
 
     # --- file count --- #
 
-    count_number = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    count_number = Value(ctypes.c_int, 0)
 
     # --- exit method --- #
 
-    INCA_EXIT = multiprocessing.Manager().Value(ctypes.c_int, 0)
+    INCA_EXIT = Value(ctypes.c_int, 0)
 
     exp_address = '166_13834_MY24_ACP2_1_auto_backup_1'
     work_address = 'Workspace'
