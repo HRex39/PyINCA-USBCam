@@ -58,7 +58,7 @@ if __name__ == '__main__':
     work_address = 'Workspace'
     folder_address = '16733'
     pathname = 'C:\\Users\\Public\\Documents\\ETAS\\INCA7.3\\Measure\\'
-    filename = 'DU24IV024_RVB'
+    filename = 'TC25IV030_BSW'
     increament_flag = 1
 
     Inca_App = Inca(work_address, exp_address, folder_address)
@@ -93,6 +93,7 @@ if __name__ == '__main__':
             if decision == 0:
                 Inca_App.stop_measurement(INCA_READY)
                 print("stop measurement!\n")
+                INCA_EXIT.value = 1
                 break
             elif decision == 1:
                 count_number.value = count_number.value + 1
@@ -123,7 +124,7 @@ if __name__ == '__main__':
             log_file_name = "log_" + str(count_number.value) + ".txt"
             with open(log_file_name, 'a') as f:
                 f.write("Inca_file_time: ")
-                f.write(str(VID_STOP_RECORD_TIME))
+                f.write(str(VID_STOP_RECORD_TIME.value))
                 f.write('\n')
                 offset_time = VID_START_RECORD_TIME.value - START_RECORD_TIME.value
                 f.write("offset time is: ")
