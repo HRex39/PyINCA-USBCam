@@ -75,7 +75,7 @@ class Camera(object):
         self.threading_name = threading_name
         self.device_id = device_id
 
-    def runCamera(self, count_number, VID_DECISION, VID_READY, VID_START_RECORD_TIME, VID_RECORD_READY, INCA_RECORD_STOP, INCA_EXIT):
+    def runCamera(self, VID_DECISION, VID_READY, VID_START_RECORD_TIME, VID_RECORD_READY, INCA_RECORD_STOP, INCA_EXIT):
         mutex = multiprocessing.Lock()
         flag_break = 0
         flag_cap = [0, 0, 0, 0]
@@ -118,7 +118,7 @@ class Camera(object):
                 height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                 fps = cap.get(cv2.CAP_PROP_FPS)
                 fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
-                filename = "video_result_" + str(count_number.value) + ".mp4"
+                filename = "video_result_" + str(time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime(time.time()))) + ".mp4"
                 writer = cv2.VideoWriter(filename, fourcc, fps, (width, height))
 
                 while cap.isOpened():

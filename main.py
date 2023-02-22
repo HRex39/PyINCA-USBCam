@@ -46,10 +46,6 @@ if __name__ == '__main__':
     VID_START_RECORD_TIME = Value(ctypes.c_float, 0)
     VID_STOP_RECORD_TIME = Value(ctypes.c_float, 0)
 
-    # --- file count --- #
-
-    count_number = Value(ctypes.c_int, 0)
-
     # --- exit method --- #
 
     INCA_EXIT = Value(ctypes.c_int, 0)
@@ -79,8 +75,7 @@ if __name__ == '__main__':
     p2 = multiprocessing.Process(target=CamDecision.runCameraDecision, args=(
     "Camera_Decision_Thread", VID_DECISION, INCA_READY, VID_RECORD_START, VID_RECORD_STOP, INCA_EXIT))
     Cam1 = Cam.Camera(threading_name="Cam1_Thread", device_id=0)
-    p3 = multiprocessing.Process(target=Cam1.runCamera, args=(
-    count_number, VID_DECISION, VID_READY, VID_START_RECORD_TIME, VID_RECORD_READY, INCA_RECORD_STOP, INCA_EXIT))
+    p3 = multiprocessing.Process(target=Cam1.runCamera, args=(VID_DECISION, VID_READY, VID_START_RECORD_TIME, VID_RECORD_READY, INCA_RECORD_STOP, INCA_EXIT))
 
     p2.start()
     p3.start()
@@ -96,7 +91,6 @@ if __name__ == '__main__':
                 INCA_EXIT.value = 1
                 break
             elif decision == 1:
-                count_number.value = count_number.value + 1
                 VID_RECORD_START.value = 1
                 while not VID_RECORD_READY.value:
                     pass
@@ -121,7 +115,7 @@ if __name__ == '__main__':
 
             VID_STOP_RECORD_TIME.value = time.time()
 
-            log_file_name = "log_" + str(count_number.value) + ".txt"
+            log_file_name = "log_" + str(time.strftime("%Y-%m-%d_%H_%M_%S", time.localtime(time.time()))) + ".txt"
             with open(log_file_name, 'a') as f:
                 f.write("Inca_file_time: ")
                 f.write(str(VID_STOP_RECORD_TIME.value))
